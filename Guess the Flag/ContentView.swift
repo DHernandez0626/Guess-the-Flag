@@ -7,12 +7,17 @@
 
 import SwiftUI
 
+
 struct ContentView: View {
+    //Array of countries that shuffles randomly
     @State var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland",
                      "Spain", "UK", "Ukraine", "US"].shuffled()
+   //Randomly selects the first 3 countries out of the above array after shuffle to be the answer
     @State var correctAnswer = Int.random(in: 0...2)
-    @State var correctCountry = ""
+    //unused in this current code
+    //@State var correctCountry = ""
     
+    //Keeps track of the game state and score/attempts
     @State private var score = 0
     @State private var attempt = 1
     @State private var gameOver = false
@@ -20,7 +25,23 @@ struct ContentView: View {
     @State private var showingScore = false
     @State private var scoreTitle = ""
     
+    
+    //stored view for choosing the first 3 flags in the countries array
+    var FlagImage: some View {
+        ForEach(0..<3) { number in
+            Button {
+                flagTapped(number)
+            } label: {
+                Image(countries[number])
+                    .clipShape(.capsule)
+                    .shadow(radius: 5)
+            }
+        }
+    }
+    
+    
     var body: some View {
+        //Background image
         ZStack {
             RadialGradient(stops: [
                 .init(color: Color(red: 0.1, green: 0.2, blue: 0.45), location: 0.3),
@@ -30,11 +51,11 @@ struct ContentView: View {
             
             VStack {
                 Spacer()
-                
+                //Title
                 Text("Guess The Flag")
                     .font(.largeTitle.weight(.bold))
                     .foregroundStyle(.white)
-                
+                //Instructionsa above the play area
                 VStack(spacing: 15) {
                     VStack {
                         Text("Tap the flag of")
@@ -44,15 +65,10 @@ struct ContentView: View {
                         Text(countries[correctAnswer])
                             .font(.largeTitle.weight(.semibold))
                     }
-                    ForEach(0..<3) { number in
-                        Button {
-                            flagTapped(number)
-                        } label: {
-                            Image(countries[number])
-                                .clipShape(.capsule)
-                                .shadow(radius: 5)
-                        }
-                    }
+                    
+                    //Calls FlagImage view on this Vstack
+                    FlagImage
+               
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
@@ -62,6 +78,7 @@ struct ContentView: View {
                 Spacer()
                 Spacer()
                 
+                //score listed below the play area
                 Text("Score: \(score)")
                     .foregroundStyle(.white)
                     .font(.title.bold())
@@ -70,6 +87,7 @@ struct ContentView: View {
             }
             .padding()
         }
+        //game over alert when max # of attempts is made
         .alert(Text("Game Over"), isPresented: $gameOver) {
             Button("Restart game", action: restartGame)
         } message: {
@@ -83,7 +101,7 @@ struct ContentView: View {
         }
         
     }
-    
+    //Displays if a correct or incorrect answer is chosen
     func flagTapped(_ number: Int) {
         if number == correctAnswer {
             scoreTitle = "Correct"
@@ -97,7 +115,7 @@ struct ContentView: View {
             showingScore = true
         }
     }
-    
+    //the 2 following funcs either continues or restarts the game
     func askQuestion () {
         attempt += 1
         countries.shuffle()
