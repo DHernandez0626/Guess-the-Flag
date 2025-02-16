@@ -41,18 +41,35 @@ struct ContentView: View {
     @State private var showingScore = false
     @State private var scoreTitle = ""
     
+    @State private var correctAnimation = false
+    @State private var correctAnimationAmount = 0.0
+    @State private var opacityNumber = 1.0
+    
     
     //stored view for choosing the first 3 flags in the countries array
     var FlagImage: some View {
         ForEach(0..<3) { number in
             Button {
                 flagTapped(number)
+                if number == correctAnswer {
+                    withAnimation{
+                        correctAnimationAmount += 360
+                        opacityNumber = 0.25
+                    }
+                }
             } label: {
                 Image(countries[number])
                     .clipShape(.capsule)
                     .shadow(radius: 5)
             }
+            .rotation3DEffect(.degrees(number == correctAnswer ? correctAnimationAmount: 0), axis: (x: 0, y: 1, z: 0))
+            .opacity(number == correctAnswer ? 1 : opacityNumber)
+            .animation(.easeInOut(duration: number == correctAnswer ? 4 : 0), value: correctAnimationAmount)
+            .onTapGesture {
+                correctAnimation = true
+            }
         }
+
     }
     
     
@@ -83,12 +100,13 @@ struct ContentView: View {
                     
                     //Calls FlagImage view on this Vstack
                     FlagImage
-               
+                    
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
                 .background(.regularMaterial)
                 .clipShape(.rect(cornerRadius: 20))
+                
                 
                 Spacer()
                 Spacer()
@@ -100,8 +118,10 @@ struct ContentView: View {
                 Spacer()
                 
             }
+            
             .padding()
         }
+        
         //game over alert when max # of attempts is made
         .alert(Text("Game Over"), isPresented: $gameOver) {
             Button("Restart game", action: restartGame)
@@ -135,6 +155,7 @@ struct ContentView: View {
         attempt += 1
         countries.shuffle()
         correctAnswer = Int.random(in: 1..<3)
+        opacityNumber = 1.0
     }
     
     func restartGame () {
@@ -142,6 +163,7 @@ struct ContentView: View {
         score = 0
         countries.shuffle()
         correctAnswer = Int.random(in: 1..<3)
+        opacityNumber = 1.0
     }
 }
 
